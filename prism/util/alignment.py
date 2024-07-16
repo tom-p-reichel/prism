@@ -187,7 +187,8 @@ def align_factory(
                      float],
     cskip: Callable[[T],
                     float],
-    numba: bool = True
+    numba: bool = True,
+    select_best = None
 ) -> Callable[[Sequence[T],
                Sequence[T],
                bool],
@@ -251,7 +252,9 @@ def align_factory(
         # run the O(n^2) part in a fast, jitted kernel.
         kernel(D, BT, a, b)
 
-        x, y = len(a), len(b)
+        x, y = select_best(D) if select_best is not None else (len(a), len(b))
+
+        cost = D[x,y]
 
         alignment = []
 
@@ -264,7 +267,7 @@ def align_factory(
             x, y = nx, ny
 
         if return_cost:
-            return D[-1, -1], alignment[::-1]
+            return cost, alignment[::-1]
         else:
             return alignment[::-1]
 
